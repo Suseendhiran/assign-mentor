@@ -48,32 +48,33 @@ router.route("/updatestudent").put(async (req, res) => {
         { _id: ObjectId(mentorId) },
         { $push: { assignedStudents: studentId } }
       );
-    console.log(
-      "update",
-      updateStudentRes,
-      updateOldMentor,
-      updateCurrentMentor
-    );
+
     if (
       updateStudentRes.modifiedCount > 0 &&
       updateOldMentor.modifiedCount > 0 &&
       updateCurrentMentor.modifiedCount
     ) {
       res.send({ message: "Student Successfully updated" });
+      return;
+    }
+    if (
+      updateStudentRes.modifiedCount > 0 ||
+      (updateOldMentor.modifiedCount > 0 && updateCurrentMentor.modifiedCount)
+    ) {
+      res.send({ message: "Student Already has same mentor" });
+      return;
     }
   } else {
     const updateMentor = await client
       .db("assignmentor")
       .collection("mentors")
       .updateOne(
-        { _id: ObjectId(student.mentorId) },
+        { _id: ObjectId(mentorId) },
         { $push: { assignedStudents: studentId } }
       );
     const updateStudentRes = await updateStudent();
-    if (
-      updateStudentRes.mentorModifiedCount > 0 &&
-      updateMentor.modifiedCount > 0
-    ) {
+
+    if (updateStudentRes.modifiedCount > 0 && updateMentor.modifiedCount > 0) {
       res.send({ message: "Student Successfully updated" });
     }
   }

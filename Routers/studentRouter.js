@@ -19,10 +19,12 @@ router.route("/addstudent").post(async (req, res) => {
 router.route("/updatestudent").put(async (req, res) => {
   const studentId = req.body.studentId;
   const mentorId = req.body.mentorId;
+  //get student details
   const student = await client
     .db("assignmentor")
     .collection("students")
     .findOne({ _id: ObjectId(studentId) });
+  //update student with mentorid
   async function updateStudent() {
     return await client
       .db("assignmentor")
@@ -32,6 +34,7 @@ router.route("/updatestudent").put(async (req, res) => {
         { $set: { mentorId: mentorId } }
       );
   }
+  //if student already has mentor, remove student from old mentor studentslist and add student to current mentor students list
   if (student.mentorId) {
     const updateOldMentor = await client
       .db("assignmentor")
@@ -57,6 +60,7 @@ router.route("/updatestudent").put(async (req, res) => {
       res.send({ message: "Student Successfully updated" });
       return;
     }
+    //if try to same mentor for student, execute this
     if (
       updateStudentRes.modifiedCount > 0 ||
       (updateOldMentor.modifiedCount > 0 && updateCurrentMentor.modifiedCount)
@@ -64,7 +68,9 @@ router.route("/updatestudent").put(async (req, res) => {
       res.send({ message: "Student Already has same mentor" });
       return;
     }
-  } else {
+  }
+  //if student has no mentor
+  else {
     const updateMentor = await client
       .db("assignmentor")
       .collection("mentors")

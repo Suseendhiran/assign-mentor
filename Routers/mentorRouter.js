@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.route("/mentorstudents/:mentorId").get(async (req, res) => {
   const { mentorId } = req.params;
+  //get studentsIds of a mentor
   const { assignedStudents } = await client
     .db("assignmentor")
     .collection("mentors")
@@ -13,15 +14,15 @@ router.route("/mentorstudents/:mentorId").get(async (req, res) => {
       { _id: ObjectId(mentorId) },
       { projection: { assignedStudents: 1, _id: 0 } }
     );
-
+  //convert ids to object ids
   const studentIdsAsObject = assignedStudents.map((id) => ObjectId(id));
-
+  //Get students details
   const mentorStudents = await client
     .db("assignmentor")
     .collection("students")
     .find({ _id: { $in: studentIdsAsObject } })
     .toArray();
-  console.log(mentorStudents);
+
   if (mentorStudents) {
     res.send({ students: mentorStudents });
     return;
@@ -47,7 +48,7 @@ router.route("/addmentor").post(async (req, res) => {
 
 router.route("/addstudents").put(async (req, res) => {
   const studentIds = req.body.studentIds;
-
+  //Push studentsIds to assignedStudents of a mentor
   async function updateMentorWithStudents() {
     const updateMentor = await client
       .db("assignmentor")
@@ -59,7 +60,9 @@ router.route("/addstudents").put(async (req, res) => {
 
     return updateMentor.modifiedCount;
   }
+  //Update mentorId field of students in studentsIds Array
   const updateStudentsWithMentor = async () => {
+    //Write query for multiple students update
     const bulkWriteQuery = studentIds.map((id) => {
       return {
         updateOne: {
@@ -75,17 +78,17 @@ router.route("/addstudents").put(async (req, res) => {
 
     return updateStudents.modifiedCount;
   };
-
+  //return students have mentor field
   const studentsHaveMentor = await client
     .db("assignmentor")
     .collection("students")
     .find({ mentorId: { $exists: true } })
     .toArray();
-
+  //Returns studentsIds from request already have mentor
   let requestedStudentsMentorsChecker = studentsHaveMentor
     .filter((student) => studentIds.includes(student._id.toString()))
     .map((student) => student._id);
-
+  //if studentsIds in request already have mentors, execute this
   if (requestedStudentsMentorsChecker.length) {
     res.send({
       studentsHaveMentor: requestedStudentsMentorsChecker,

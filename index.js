@@ -26,30 +26,3 @@ app.get("/", (req, res) => {
 
 app.use("/mentors", MentorRouter);
 app.use("/students", StudentsRouter);
-
-app.post("/students/addstudents", async (req, res) => {
-  const insertStudent = await client
-    .db("assignmentor")
-    .collection("students")
-    .insertOne(req.body);
-  if (insertStudent.acknowledged) {
-    res.send({ message: "Student details added" });
-    return;
-  }
-  res.status(400).send({ message: "Error!" });
-});
-app.put("/students/updatestudent", async (req, res) => {
-  const updateStudent = await client
-    .db("assignmentor")
-    .collection("students")
-    .updateOne(
-      { _id: ObjectId(req.body.studentId) },
-      { $set: { mentorId: req.body.mentorId } }
-    );
-
-  if (updateStudent.acknowledged) {
-    res.send({ message: "Student suceesfully updated" });
-    return;
-  }
-  res.status(400).send({ message: "Error!" });
-});

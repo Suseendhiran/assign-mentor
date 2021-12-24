@@ -9,7 +9,7 @@ router.route("/list").get(async (req, res) => {
   const students = await client
     .db("assignmentor")
     .collection("students")
-    .find({}, { projection: { _id: 1, name: 1 } })
+    .find({}, { projection: { _id: 1, name: 1, mentorId: 1 } })
     .toArray();
 
   if (students.length >= 0) {

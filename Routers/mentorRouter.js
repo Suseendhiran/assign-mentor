@@ -4,6 +4,21 @@ import { ObjectId } from "mongodb";
 
 const router = express.Router();
 
+//get all mentors
+router.route("/list").get(async (req, res) => {
+  const mentors = await client
+    .db("assignmentor")
+    .collection("mentors")
+    .find({}, { projection: { _id: 1, name: 1 } })
+    .toArray();
+
+  if (mentors.length >= 0) {
+    res.send(mentors);
+    return;
+  }
+  res.statusCode(404).send({ message: "Error!" });
+});
+
 router.route("/mentorstudents/:mentorId").get(async (req, res) => {
   const { mentorId } = req.params;
   //get studentsIds of a mentor

@@ -4,6 +4,21 @@ import { client } from "../index.js";
 
 const router = express.Router();
 
+//get all students
+router.route("/list").get(async (req, res) => {
+  const students = await client
+    .db("assignmentor")
+    .collection("students")
+    .find({}, { projection: { _id: 1, name: 1 } })
+    .toArray();
+
+  if (students.length >= 0) {
+    res.send(students);
+    return;
+  }
+  res.statusCode(404).send({ message: "Error!" });
+});
+
 router.route("/addstudent").post(async (req, res) => {
   const insertStudent = await client
     .db("assignmentor")

@@ -2,6 +2,7 @@ import express from "express";
 import { MongoClient, ObjectId } from "mongodb";
 import { MentorRouter } from "./Routers/mentorRouter.js";
 import { StudentsRouter } from "./Routers/studentRouter.js";
+import cors from "cors";
 import dotenv from "dotenv";
 
 const app = express();
@@ -9,6 +10,7 @@ dotenv.config();
 
 app.listen(process.env.PORT);
 app.use(express.json());
+app.use(cors());
 
 const MONGO_URL = process.env.MONGO_URL;
 
